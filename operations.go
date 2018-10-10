@@ -3,8 +3,8 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"os"
+	"time"
 
 	mgo "gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
@@ -12,11 +12,18 @@ import (
 
 // Establish a connection to database
 func Connect(connectionUrl string) {
-	session, err := mgo.Dial(connectionUrl)
-	if err != nil {
-		log.Fatal(err)
+	info := &mgo.DialInfo{
+		Addrs:    []string{connectionUrl},
+		Timeout:  5 * time.Second,
+		Database: DB,
+		Username: "",
+		Password: "",
 	}
-	db = session.DB(COLLECTION)
+	session, err := mgo.DialWithInfo(info)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	db = session.DB(DB)
 }
 
 // Find list of Itemss
@@ -61,7 +68,8 @@ func LoadConfiguration() {
 	}
 	jsonParser := json.NewDecoder(configFile)
 	jsonParser.Decode(&config)
-	var url = config.Host + ":" + config.Port
+	var url = config.Hosts
 	COLLECTION = config.Collection
+	DB = config.Database
 	Connect(url)
 }

@@ -1,5 +1,5 @@
-{  
-    "host": "localhost",
-    "port": "27017",
-    "collection":"GoItems"
+{   
+    "hosts" : "mongo:27017",
+	"database" : "db",
+	"collection":"jobs"
 }

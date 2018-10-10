@@ -16,6 +16,7 @@ type Items []Item
 var db *mgo.Database
 
 var COLLECTION string
+var DB string
 
 func homePage(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Welcome to the HomePage!Service is working")
@@ -60,12 +61,19 @@ func CreateItemsEndPoint(w http.ResponseWriter, r *http.Request) {
 
 // PUT update an existing item
 func UpdateItemsEndPoint(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	item, err := FindById(params["id"])
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "Invalid item ID")
+		return
+	}
+	var bsonid = item.ID
 	defer r.Body.Close()
-	var item Item
 	if err := json.NewDecoder(r.Body).Decode(&item); err != nil {
 		respondWithError(w, http.StatusBadRequest, "Invalid request payload")
 		return
 	}
+	item.ID = bsonid
 	if err := Update(item); err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
@@ -75,10 +83,10 @@ func UpdateItemsEndPoint(w http.ResponseWriter, r *http.Request) {
 
 // DELETE an existing item
 func DeleteItemsEndPoint(w http.ResponseWriter, r *http.Request) {
-	defer r.Body.Close()
-	var item Item
-	if err := json.NewDecoder(r.Body).Decode(&item); err != nil {
-		respondWithError(w, http.StatusBadRequest, "Invalid request payload")
+	params := mux.Vars(r)
+	item, err := FindById(params["id"])
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "Invalid item ID")
 		return
 	}
 	if err := Delete(item); err != nil {
@@ -104,10 +112,10 @@ func handleRequests() {
 	myRouter.HandleFunc("/", homePage)
 	myRouter.HandleFunc("/item", AllitemsEndPoint).Methods("GET")
 	myRouter.HandleFunc("/item", CreateItemsEndPoint).Methods("POST")
-	myRouter.HandleFunc("/item", UpdateItemsEndPoint).Methods("PUT")
-	myRouter.HandleFunc("/item", DeleteItemsEndPoint).Methods("DELETE")
+	myRouter.HandleFunc("/item/{id}", UpdateItemsEndPoint).Methods("PUT")
+	myRouter.HandleFunc("/item/{id}", DeleteItemsEndPoint).Methods("DELETE")
 	myRouter.HandleFunc("/item/{id}", FinditemsEndpoint).Methods("GET")
-	log.Fatal(http.ListenAndServe(":8081", myRouter))
+	log.Fatal(http.ListenAndServe(":3000", myRouter))
 }
 
 func main() {

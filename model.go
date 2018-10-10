@@ -13,7 +13,7 @@ type Item struct {
 }
 
 type Config struct {
-	Host       string `json:"host"`
-	Port       string `json:"port"`
+	Hosts      string `json:"hosts"`
+	Database   string `json:"database"`
 	Collection string `json:"collection"`
 }

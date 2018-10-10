@@ -1,0 +1,17 @@
+version: '3'
+services:
+    app:     
+        container_name: 'gooo_app'
+        restart: always
+        build: .  
+        ports:
+        - '3000:3000'
+        tty: true
+        links:
+            - mongodb
+    mongodb:
+        image: mongo
+        container_name: 'mongo'
+        ports:
+            - 27017:27017
+
