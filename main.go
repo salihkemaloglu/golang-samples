@@ -23,7 +23,7 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 }
 
 // GET list of items
-func AllitemsEndPoint(w http.ResponseWriter, r *http.Request) {
+func GetAll(w http.ResponseWriter, r *http.Request) {
 	items, err := FindAll()
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
@@ -33,7 +33,7 @@ func AllitemsEndPoint(w http.ResponseWriter, r *http.Request) {
 }
 
 // GET a item by its ID
-func FinditemsEndpoint(w http.ResponseWriter, r *http.Request) {
+func GetById(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	item, err := FindById(params["id"])
 	if err != nil {
@@ -44,7 +44,7 @@ func FinditemsEndpoint(w http.ResponseWriter, r *http.Request) {
 }
 
 // POST a new item
-func CreateItemsEndPoint(w http.ResponseWriter, r *http.Request) {
+func InsertItem(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	var item Item
 	if err := json.NewDecoder(r.Body).Decode(&item); err != nil {
@@ -60,7 +60,7 @@ func CreateItemsEndPoint(w http.ResponseWriter, r *http.Request) {
 }
 
 // PUT update an existing item
-func UpdateItemsEndPoint(w http.ResponseWriter, r *http.Request) {
+func UpdateItem(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	item, err := FindById(params["id"])
 	if err != nil {
@@ -82,7 +82,7 @@ func UpdateItemsEndPoint(w http.ResponseWriter, r *http.Request) {
 }
 
 // DELETE an existing item
-func DeleteItemsEndPoint(w http.ResponseWriter, r *http.Request) {
+func DeleteItem(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	item, err := FindById(params["id"])
 	if err != nil {
@@ -110,11 +110,11 @@ func respondWithJson(w http.ResponseWriter, code int, payload interface{}) {
 func handleRequests() {
 	myRouter := mux.NewRouter().StrictSlash(true)
 	myRouter.HandleFunc("/", homePage)
-	myRouter.HandleFunc("/item", AllitemsEndPoint).Methods("GET")
-	myRouter.HandleFunc("/item", CreateItemsEndPoint).Methods("POST")
-	myRouter.HandleFunc("/item/{id}", UpdateItemsEndPoint).Methods("PUT")
-	myRouter.HandleFunc("/item/{id}", DeleteItemsEndPoint).Methods("DELETE")
-	myRouter.HandleFunc("/item/{id}", FinditemsEndpoint).Methods("GET")
+	myRouter.HandleFunc("/item", GetAll).Methods("GET")
+	myRouter.HandleFunc("/item/{id}", GetById).Methods("GET")
+	myRouter.HandleFunc("/item", InsertItem).Methods("POST")
+	myRouter.HandleFunc("/item/{id}", UpdateItem).Methods("PUT")
+	myRouter.HandleFunc("/item/{id}", DeleteItem).Methods("DELETE")
 	log.Fatal(http.ListenAndServe(":3000", myRouter))
 }
 
