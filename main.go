@@ -24,7 +24,8 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 
 // GET list of items
 func GetAll(w http.ResponseWriter, r *http.Request) {
-	items, err := FindAll()
+	repo := Item{}
+	var items, err = FindAll(repo)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
@@ -35,7 +36,8 @@ func GetAll(w http.ResponseWriter, r *http.Request) {
 // GET a item by its ID
 func GetById(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	item, err := FindById(params["id"])
+	repo := Item{ItemId: params["id"]}
+	item, err := FindById(repo)
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "Invalid item ID")
 		return
@@ -62,7 +64,8 @@ func InsertItem(w http.ResponseWriter, r *http.Request) {
 // PUT update an existing item
 func UpdateItem(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	item, err := FindById(params["id"])
+	repo := Item{ItemId: params["id"]}
+	item, err := FindById(repo)
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "Invalid item ID")
 		return
@@ -84,7 +87,8 @@ func UpdateItem(w http.ResponseWriter, r *http.Request) {
 // DELETE an existing item
 func DeleteItem(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	item, err := FindById(params["id"])
+	repo := Item{ItemId: params["id"]}
+	item, err := FindById(repo)
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "Invalid item ID")
 		return
@@ -115,7 +119,7 @@ func handleRequests() {
 	myRouter.HandleFunc("/item", InsertItem).Methods("POST")
 	myRouter.HandleFunc("/item/{id}", UpdateItem).Methods("PUT")
 	myRouter.HandleFunc("/item/{id}", DeleteItem).Methods("DELETE")
-	log.Fatal(http.ListenAndServe(":3000", myRouter))
+	log.Fatal(http.ListenAndServe(":3001", myRouter))
 }
 
 func main() {
