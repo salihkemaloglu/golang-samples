@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/rs/cors"
 	mgo "gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 )
@@ -119,7 +120,7 @@ func handleRequests() {
 	myRouter.HandleFunc("/item", InsertItem).Methods("POST")
 	myRouter.HandleFunc("/item/{id}", UpdateItem).Methods("PUT")
 	myRouter.HandleFunc("/item/{id}", DeleteItem).Methods("DELETE")
-	log.Fatal(http.ListenAndServe(":3001", myRouter))
+	log.Fatal(http.ListenAndServe(":8080", cors.AllowAll().Handler(myRouter)))
 }
 
 func main() {
