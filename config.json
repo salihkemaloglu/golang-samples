@@ -1,5 +1,6 @@
 {   
     "hosts" : "mongo:27017",
-	"database" : "db",
-	"collection":"jobs"
+    "database" : "data",
+    "item":"item",
+    "user":"user"
 }

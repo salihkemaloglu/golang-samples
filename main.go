@@ -2,25 +2,60 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 
 	"github.com/gorilla/mux"
 	"github.com/rs/cors"
-	mgo "gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 )
 
-type Items []Item
+func UserRegister(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	var user User
+	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
+		respondWithError(w, http.StatusBadRequest, "Invalid request payload")
+		return
+	} else if check := UserFieldValidation(user); check != "ok" {
+		respondWithError(w, http.StatusBadRequest, check)
+		return
+	}
+	if err := CheckUser(user); err != true {
+		respondWithError(w, http.StatusInternalServerError, "There is alreasy an account for: "+*user.Username)
+		return
+	}
+	user.ID = bson.NewObjectId()
+	if err := Register(user); err != true {
+		respondWithError(w, http.StatusInternalServerError, "Registration problem!")
+		return
+	}
+	user.Token = ""
+	respondWithJson(w, http.StatusCreated, user)
+}
 
-var db *mgo.Database
-
-var COLLECTION string
-var DB string
-
-func homePage(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Welcome to the HomePage!Service is working")
+func UserLogin(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	var user User
+	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
+		respondWithError(w, http.StatusBadRequest, "Invalid request payload")
+		return
+	} else if check := UserFieldValidation(user); check != "ok" {
+		respondWithError(w, http.StatusBadRequest, check)
+		return
+	}
+	user, err := Login(user)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "Invalid username or password")
+		return
+	}
+	token := CreateTokenEndpoint(user)
+	if token == "" {
+		user.Token = "Token could not created"
+	}
+	user.Token = token
+	*user.Username = ""
+	*user.Password = ""
+	respondWithJson(w, http.StatusOK, user)
 }
 
 // GET list of items
@@ -32,6 +67,15 @@ func GetAll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	respondWithJson(w, http.StatusOK, items)
+}
+func GetAllUser(w http.ResponseWriter, r *http.Request) {
+	repo := User{}
+	var users, err = FindAllUser(repo)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	respondWithJson(w, http.StatusOK, users)
 }
 
 // GET a item by its ID
@@ -53,6 +97,9 @@ func InsertItem(w http.ResponseWriter, r *http.Request) {
 	if err := json.NewDecoder(r.Body).Decode(&item); err != nil {
 		respondWithError(w, http.StatusBadRequest, "Invalid request payload")
 		return
+	} else if check := ItemFildValidation(item); check != "ok" {
+		respondWithError(w, http.StatusBadRequest, check)
+		return
 	}
 	item.ID = bson.NewObjectId()
 	if err := Insert(item); err != nil {
@@ -64,6 +111,15 @@ func InsertItem(w http.ResponseWriter, r *http.Request) {
 
 // PUT update an existing item
 func UpdateItem(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	var itemGet Item
+	if err := json.NewDecoder(r.Body).Decode(&itemGet); err != nil {
+		respondWithError(w, http.StatusBadRequest, "Invalid request payload")
+		return
+	} else if check := ItemFildValidation(itemGet); check != "ok" {
+		respondWithError(w, http.StatusBadRequest, check)
+		return
+	}
 	params := mux.Vars(r)
 	repo := Item{ItemId: params["id"]}
 	item, err := FindById(repo)
@@ -71,14 +127,8 @@ func UpdateItem(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusBadRequest, "Invalid item ID")
 		return
 	}
-	var bsonid = item.ID
-	defer r.Body.Close()
-	if err := json.NewDecoder(r.Body).Decode(&item); err != nil {
-		respondWithError(w, http.StatusBadRequest, "Invalid request payload")
-		return
-	}
-	item.ID = bsonid
-	if err := Update(item); err != nil {
+	itemGet.ID = item.ID
+	if err := Update(itemGet); err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -114,12 +164,14 @@ func respondWithJson(w http.ResponseWriter, code int, payload interface{}) {
 
 func handleRequests() {
 	myRouter := mux.NewRouter().StrictSlash(true)
-	myRouter.HandleFunc("/", homePage)
-	myRouter.HandleFunc("/item", GetAll).Methods("GET")
-	myRouter.HandleFunc("/item/{id}", GetById).Methods("GET")
-	myRouter.HandleFunc("/item", InsertItem).Methods("POST")
-	myRouter.HandleFunc("/item/{id}", UpdateItem).Methods("PUT")
-	myRouter.HandleFunc("/item/{id}", DeleteItem).Methods("DELETE")
+	myRouter.HandleFunc("/login", UserLogin).Methods("POST")
+	myRouter.HandleFunc("/register", UserRegister).Methods("POST")
+	myRouter.HandleFunc("/item", ValidateMiddleware(GetAll)).Methods("GET")
+	myRouter.HandleFunc("/user", ValidateMiddleware(GetAllUser)).Methods("GET")
+	myRouter.HandleFunc("/item/{id}", ValidateMiddleware(GetById)).Methods("GET")
+	myRouter.HandleFunc("/item", ValidateMiddleware(InsertItem)).Methods("POST")
+	myRouter.HandleFunc("/item/{id}", ValidateMiddleware(UpdateItem)).Methods("PUT")
+	myRouter.HandleFunc("/item/{id}", ValidateMiddleware(DeleteItem)).Methods("DELETE")
 	log.Fatal(http.ListenAndServe(":8080", cors.AllowAll().Handler(myRouter)))
 }
 
