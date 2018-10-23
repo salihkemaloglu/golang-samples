@@ -1,25 +1,30 @@
-version: '3.3'
+version: '2.1'
 services:
   api:
-    container_name: 'api'
-    build: .
+    container_name: api
+    image: gooo:latest
     ports:
-      - '8080:8080'
-    volumes:
-      - '.:/go/src/app'
+      - 8080:8080
     depends_on:
-      - 'mongo'
+        mongo:
+          condition: service_healthy
   web:
-    container_name: 'web'
-    image: 'nginx:latest'
+    container_name: web
+    image: nginx:latest
     ports:
-      - '8081:80'
+      - 8081:80
     volumes:
-      - './web:/usr/share/nginx/html'
+      - ./web:/usr/share/nginx/html
     depends_on:
-      - 'api'
+      - api
   mongo:
-    image: 'mongo:latest'
-    container_name: 'mongo'
+    image: mongo:latest
+    container_name: mongo
     ports:
-      - '27100:27017'
+      - 27100:27017
+    healthcheck:
+      test: echo 'db.stats().ok' | mongo localhost:27017 --quiet
+      interval: 1m
+      timeout: 25s
+      retries: 1
+    command: mongod --smallfiles

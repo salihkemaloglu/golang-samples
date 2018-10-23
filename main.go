@@ -7,7 +7,6 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/rs/cors"
-	"gopkg.in/mgo.v2/bson"
 )
 
 func UserRegister(w http.ResponseWriter, r *http.Request) {
@@ -20,13 +19,13 @@ func UserRegister(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusBadRequest, check)
 		return
 	}
-	if err := CheckUser(user); err != true {
+	var e UserRepository = user
+	if err := e.CheckUser(); err != true {
 		respondWithError(w, http.StatusInternalServerError, "There is alreasy an account for: "+*user.Username)
 		return
 	}
-	user.ID = bson.NewObjectId()
-	if err := Register(user); err != true {
-		respondWithError(w, http.StatusInternalServerError, "Registration problem!")
+	if err := e.Register(); err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Registration problem!"+err.Error())
 		return
 	}
 	user.Token = ""
@@ -43,9 +42,15 @@ func UserLogin(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusBadRequest, check)
 		return
 	}
-	user, err := Login(user)
+	var e UserRepository = user
+	data, err := e.Login()
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "Invalid username or password")
+		return
+	}
+	err = json.Unmarshal(data, &user)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, err.Error())
 		return
 	}
 	token := CreateTokenEndpoint(user)
@@ -61,33 +66,53 @@ func UserLogin(w http.ResponseWriter, r *http.Request) {
 // GET list of items
 func GetAll(w http.ResponseWriter, r *http.Request) {
 	repo := Item{}
-	var items, err = FindAll(repo)
+	var e BaseRepository = repo
+	var items, err = e.FindAll()
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-	respondWithJson(w, http.StatusOK, items)
+	var item []Item
+	err = json.Unmarshal(items, &item)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	respondWithJson(w, http.StatusOK, item)
 }
 func GetAllUser(w http.ResponseWriter, r *http.Request) {
 	repo := User{}
-	var users, err = FindAllUser(repo)
+	var e BaseRepository = repo
+	var users, err = e.FindAll()
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-	respondWithJson(w, http.StatusOK, users)
+	var user []User
+	err = json.Unmarshal(users, &user)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	respondWithJson(w, http.StatusOK, user)
 }
 
 // GET a item by its ID
 func GetById(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	repo := Item{ItemId: params["id"]}
-	item, err := FindById(repo)
+	var e BaseRepository = repo
+	item, err := e.FindById()
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "Invalid item ID")
 		return
 	}
-	respondWithJson(w, http.StatusOK, item)
+	err = json.Unmarshal(item, &repo)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	respondWithJson(w, http.StatusOK, repo)
 }
 
 // POST a new item
@@ -101,8 +126,8 @@ func InsertItem(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusBadRequest, check)
 		return
 	}
-	item.ID = bson.NewObjectId()
-	if err := Insert(item); err != nil {
+	var e BaseRepository = item
+	if err := e.Insert(); err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -113,6 +138,7 @@ func InsertItem(w http.ResponseWriter, r *http.Request) {
 func UpdateItem(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	var itemGet Item
+	var item Item
 	if err := json.NewDecoder(r.Body).Decode(&itemGet); err != nil {
 		respondWithError(w, http.StatusBadRequest, "Invalid request payload")
 		return
@@ -120,15 +146,23 @@ func UpdateItem(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusBadRequest, check)
 		return
 	}
+
 	params := mux.Vars(r)
 	repo := Item{ItemId: params["id"]}
-	item, err := FindById(repo)
+	var e BaseRepository = repo
+	data, err := e.FindById()
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "Invalid item ID")
 		return
 	}
+	er := json.Unmarshal(data, &item)
+	if er != nil {
+		respondWithError(w, http.StatusBadRequest, "Invalid username or password")
+		return
+	}
 	itemGet.ID = item.ID
-	if err := Update(itemGet); err != nil {
+	e = itemGet
+	if err := e.Update(); err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -139,12 +173,20 @@ func UpdateItem(w http.ResponseWriter, r *http.Request) {
 func DeleteItem(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	repo := Item{ItemId: params["id"]}
-	item, err := FindById(repo)
+	var item Item
+	var e BaseRepository = repo
+	data, err := e.FindById()
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "Invalid item ID")
 		return
 	}
-	if err := Delete(item); err != nil {
+	er := json.Unmarshal(data, &item)
+	if er != nil {
+		respondWithError(w, http.StatusBadRequest, "Invalid username or password")
+		return
+	}
+	e = item
+	if err := e.Delete(); err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
