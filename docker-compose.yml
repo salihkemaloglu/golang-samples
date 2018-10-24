@@ -3,6 +3,8 @@ services:
   api:
     container_name: api
     image: gooo:latest
+    environment:
+    - CONFIG_ENV=config.dev.json
     ports:
       - 8080:8080
     depends_on:
@@ -24,7 +26,7 @@ services:
       - 27100:27017
     healthcheck:
       test: echo 'db.stats().ok' | mongo localhost:27017 --quiet
-      interval: 1m
+      interval: 10s
       timeout: 25s
       retries: 1
     command: mongod --smallfiles

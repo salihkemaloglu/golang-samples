@@ -127,7 +127,8 @@ func Connect(connectionUrl string) {
 // Parse the configuration file 'config.toml', and establish a connection to DB
 func LoadConfiguration() {
 	var config Config
-	configFile, err := os.Open("config.json")
+	filename := os.Getenv("CONFIG_ENV")
+	configFile, err := os.Open(filename)
 	defer configFile.Close()
 	if err != nil {
 		fmt.Println(err.Error())

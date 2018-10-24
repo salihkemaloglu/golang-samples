@@ -2,11 +2,13 @@ package main
 
 import (
 	"encoding/json"
+
 	"log"
 	"net/http"
 
-	"github.com/gorilla/mux"
 	"github.com/rs/cors"
+	"goji.io"
+	"goji.io/pat"
 )
 
 func UserRegister(w http.ResponseWriter, r *http.Request) {
@@ -99,8 +101,8 @@ func GetAllUser(w http.ResponseWriter, r *http.Request) {
 
 // GET a item by its ID
 func GetById(w http.ResponseWriter, r *http.Request) {
-	params := mux.Vars(r)
-	repo := Item{ItemId: params["id"]}
+	params := pat.Param(r, "id")
+	repo := Item{ItemId: params}
 	var e BaseRepository = repo
 	item, err := e.FindById()
 	if err != nil {
@@ -147,8 +149,8 @@ func UpdateItem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	params := mux.Vars(r)
-	repo := Item{ItemId: params["id"]}
+	params := pat.Param(r, "id")
+	repo := Item{ItemId: params}
 	var e BaseRepository = repo
 	data, err := e.FindById()
 	if err != nil {
@@ -171,8 +173,8 @@ func UpdateItem(w http.ResponseWriter, r *http.Request) {
 
 // DELETE an existing item
 func DeleteItem(w http.ResponseWriter, r *http.Request) {
-	params := mux.Vars(r)
-	repo := Item{ItemId: params["id"]}
+	params := pat.Param(r, "id")
+	repo := Item{ItemId: params}
 	var item Item
 	var e BaseRepository = repo
 	data, err := e.FindById()
@@ -205,16 +207,16 @@ func respondWithJson(w http.ResponseWriter, code int, payload interface{}) {
 }
 
 func handleRequests() {
-	myRouter := mux.NewRouter().StrictSlash(true)
-	myRouter.HandleFunc("/login", UserLogin).Methods("POST")
-	myRouter.HandleFunc("/register", UserRegister).Methods("POST")
-	myRouter.HandleFunc("/item", ValidateMiddleware(GetAll)).Methods("GET")
-	myRouter.HandleFunc("/user", ValidateMiddleware(GetAllUser)).Methods("GET")
-	myRouter.HandleFunc("/item/{id}", ValidateMiddleware(GetById)).Methods("GET")
-	myRouter.HandleFunc("/item", ValidateMiddleware(InsertItem)).Methods("POST")
-	myRouter.HandleFunc("/item/{id}", ValidateMiddleware(UpdateItem)).Methods("PUT")
-	myRouter.HandleFunc("/item/{id}", ValidateMiddleware(DeleteItem)).Methods("DELETE")
-	log.Fatal(http.ListenAndServe(":8080", cors.AllowAll().Handler(myRouter)))
+	mux := goji.NewMux()
+	mux.HandleFunc(pat.Post("/login"), UserLogin)
+	mux.HandleFunc(pat.Post("/register"), UserRegister)
+	mux.HandleFunc(pat.Get("/item"), ValidateMiddleware(GetAll))
+	mux.HandleFunc(pat.Get("/user"), ValidateMiddleware(GetAllUser))
+	mux.HandleFunc(pat.Get("/item/:id"), ValidateMiddleware(GetById))
+	mux.HandleFunc(pat.Post("/item"), ValidateMiddleware(InsertItem))
+	mux.HandleFunc(pat.Put("/item/:id"), ValidateMiddleware(UpdateItem))
+	mux.HandleFunc(pat.Delete("/item/:id"), ValidateMiddleware(DeleteItem))
+	log.Fatal(http.ListenAndServe(":8080", cors.AllowAll().Handler(mux)))
 }
 
 func main() {
