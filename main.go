@@ -2,9 +2,12 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"log"
 	"net/http"
+
+	"github.com/salihkemaloglu/GitRepo"
 
 	"github.com/rs/cors"
 	"goji.io"
@@ -220,6 +223,8 @@ func handleRequests() {
 }
 
 func main() {
+	fmt.Println(mdata.TestMe())
 	LoadConfiguration()
 	handleRequests()
+
 }
