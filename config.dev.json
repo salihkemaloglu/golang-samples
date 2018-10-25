@@ -1,6 +1,0 @@
-{   
-    "hosts" : "mongo:27017",
-    "database" : "data",
-    "item":"item",
-    "user":"user"
-}

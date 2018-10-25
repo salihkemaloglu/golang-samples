@@ -3,8 +3,6 @@ services:
   api:
     container_name: api
     image: gooo:latest
-    environment:
-    - CONFIG_ENV=config.dev.json
     ports:
       - 8080:8080
     depends_on:

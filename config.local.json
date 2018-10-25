@@ -1,6 +1,0 @@
-{   
-    "hosts" : "localhost:27017",
-    "database" : "data",
-    "item":"item",
-    "user":"user"
-}

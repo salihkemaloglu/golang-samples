@@ -1,0 +1,7 @@
+version: '2.2'
+services:
+  api:
+    container_name: api
+    environment:
+    - HOST_ENV=mongo:27017
+    - DATABASE_ENV=data

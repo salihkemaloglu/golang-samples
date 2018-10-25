@@ -11,14 +11,12 @@ import (
 )
 
 var db *mgo.Database
-var ITEM string
-var USER string
 var DB string
 
 // Find list of Items
 func (r Item) FindAll() ([]byte, error) {
 	var items []Item
-	err := db.C(ITEM).Find(bson.M{}).All(&items)
+	err := db.C("item").Find(bson.M{}).All(&items)
 	if err != nil {
 		return nil, err
 	}
@@ -27,7 +25,7 @@ func (r Item) FindAll() ([]byte, error) {
 }
 func (r User) FindAll() ([]byte, error) {
 	var user []User
-	err := db.C(USER).Find(bson.M{}).All(&user)
+	err := db.C("user").Find(bson.M{}).All(&user)
 	if err != nil {
 		return nil, err
 	}
@@ -37,7 +35,7 @@ func (r User) FindAll() ([]byte, error) {
 
 // Find a Items by its id
 func (r Item) FindById() ([]byte, error) {
-	err := db.C(ITEM).FindId(bson.ObjectIdHex(r.ItemId)).One(&r)
+	err := db.C("item").FindId(bson.ObjectIdHex(r.ItemId)).One(&r)
 	if err != nil {
 		return nil, err
 	}
@@ -45,7 +43,7 @@ func (r Item) FindById() ([]byte, error) {
 	return data, err
 }
 func (r User) FindById() ([]byte, error) {
-	err := db.C(USER).FindId(bson.ObjectIdHex(*r.Password)).One(&r)
+	err := db.C("user").FindId(bson.ObjectIdHex(*r.Password)).One(&r)
 	if err != nil {
 		return nil, err
 	}
@@ -56,38 +54,38 @@ func (r User) FindById() ([]byte, error) {
 // Insert a Items into database
 func (r Item) Insert() error {
 	r.ID = bson.NewObjectId()
-	err := db.C(ITEM).Insert(&r)
+	err := db.C("item").Insert(&r)
 	return err
 }
 func (r User) Insert() error {
 	r.ID = bson.NewObjectId()
-	err := db.C(USER).Insert(&r)
+	err := db.C("user").Insert(&r)
 	return err
 }
 
 // Delete an existing Items
 func (r Item) Delete() error {
-	err := db.C(ITEM).Remove(&r)
+	err := db.C("item").Remove(&r)
 	return err
 }
 func (r User) Delete() error {
-	err := db.C(USER).Remove(&r)
+	err := db.C("user").Remove(&r)
 	return err
 }
 
 // Update an existing Items
 func (r Item) Update() error {
-	err := db.C(ITEM).Update(bson.M{"_id": r.ID}, &r)
+	err := db.C("item").Update(bson.M{"_id": r.ID}, &r)
 	return err
 }
 func (r User) Update() error {
-	err := db.C(USER).Update(bson.M{"_id": r.ID}, &r)
+	err := db.C("user").Update(bson.M{"_id": r.ID}, &r)
 	return err
 }
 
 // Find a user
 func (r User) Login() ([]byte, error) {
-	err := db.C(USER).Find(bson.M{"username": r.Username, "password": r.Password}).One(&r)
+	err := db.C("user").Find(bson.M{"username": r.Username, "password": r.Password}).One(&r)
 	if err != nil {
 		return nil, err
 	}
@@ -126,18 +124,7 @@ func Connect(connectionUrl string) {
 
 // Parse the configuration file 'config.toml', and establish a connection to DB
 func LoadConfiguration() {
-	var config Config
-	filename := os.Getenv("CONFIG_ENV")
-	configFile, err := os.Open(filename)
-	defer configFile.Close()
-	if err != nil {
-		fmt.Println(err.Error())
-	}
-	jsonParser := json.NewDecoder(configFile)
-	jsonParser.Decode(&config)
-	var url = config.Hosts
-	ITEM = config.Item
-	USER = config.User
-	DB = config.Database
+	var url = os.Getenv("HOST_ENV")
+	DB = os.Getenv("DATABASE_ENV")
 	Connect(url)
 }
