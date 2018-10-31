@@ -221,7 +221,7 @@ func handleRequests() {
 	mux.HandleFunc(pat.Delete("/item/:id"), ValidateMiddleware(DeleteItem))
 	log.Fatal(http.ListenAndServe(":8080", cors.AllowAll().Handler(mux)))
 }
-
+// Test for brech
 func main() {
 	fmt.Println(mdata.TestMe())
 	LoadConfiguration()
