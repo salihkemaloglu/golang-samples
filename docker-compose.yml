@@ -2,7 +2,7 @@ version: '2.2'
 services:
   api:
     container_name: api
-    image: gooo:latest
+    image: localhost:5000/gooo:latest
     ports:
       - 8080:8080
     depends_on:
