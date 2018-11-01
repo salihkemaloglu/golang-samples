@@ -11,7 +11,7 @@ import (
 	"github.com/gorilla/context"
 )
 
-//CreateTokenEndpoint,user token creation
+//CreateTokenEndpoint user token creation
 func CreateTokenEndpoint(user User) string {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS512, jwt.MapClaims{
 		"username": user.Username,
@@ -25,7 +25,7 @@ func CreateTokenEndpoint(user User) string {
 	return tokenString
 }
 
-//ValidateMiddleware,token validation
+//ValidateMiddleware token validation
 func ValidateMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		authorizationHeader := req.Header.Get("authorization")
@@ -55,7 +55,7 @@ func ValidateMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	})
 }
 
-//UserFieldValidation,user struct validation
+//UserFieldValidation user struct validation
 func UserFieldValidation(user User) string {
 	if user.Username == nil {
 		return "Username field is missing"
@@ -70,7 +70,7 @@ func UserFieldValidation(user User) string {
 	}
 }
 
-//ItemFildValidation,item struct validaiton
+//ItemFildValidation item struct validaiton
 func ItemFildValidation(item Item) string {
 	if item.Name == nil {
 		return "Name fiels is missing"

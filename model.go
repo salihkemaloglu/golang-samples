@@ -14,7 +14,7 @@ type Item struct {
 	Count       int           `bson:"count" json:"count"`
 }
 
-//Config,db connection info struct
+//Config db connection info struct
 type Config struct {
 	Hosts    string `json:"hosts"`
 	Database string `json:"database"`

@@ -12,7 +12,7 @@ import (
 
 var db *mgo.Database
 
-//db string
+//DB string
 var DB string
 
 // FindAll list of Items
