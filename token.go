@@ -82,7 +82,6 @@ func ItemFildValidation(item Item) string {
 		return "Value can not be empty"
 	} else if len(item.Description) > 25 {
 		return "Description length can not be bigger than 25"
-	} else {
-		return "ok"
 	}
+	return "ok"
 }
