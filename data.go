@@ -15,7 +15,7 @@ var db *mgo.Database
 //db string
 var DB string
 
-// Find list of Items
+// FindAll list of Items
 func (r Item) FindAll() ([]byte, error) {
 	var items []Item
 	err := db.C("item").Find(bson.M{}).All(&items)
@@ -26,7 +26,7 @@ func (r Item) FindAll() ([]byte, error) {
 	return data, err
 }
 
-// Find list of users
+// FindAll list of users
 func (r User) FindAll() ([]byte, error) {
 	var user []User
 	err := db.C("user").Find(bson.M{}).All(&user)
@@ -37,7 +37,7 @@ func (r User) FindAll() ([]byte, error) {
 	return data, err
 }
 
-// Find a Items by its id
+// FindById a Items by its id
 func (r Item) FindById() ([]byte, error) {
 	err := db.C("item").FindId(bson.ObjectIdHex(r.ItemId)).One(&r)
 	if err != nil {
@@ -47,7 +47,7 @@ func (r Item) FindById() ([]byte, error) {
 	return data, err
 }
 
-// Find a users by its id
+// FindById a users by its id
 func (r User) FindById() ([]byte, error) {
 	err := db.C("user").FindId(bson.ObjectIdHex(*r.Password)).One(&r)
 	if err != nil {
@@ -95,7 +95,7 @@ func (r User) Update() error {
 	return err
 }
 
-// Find a user
+// Login a user
 func (r User) Login() ([]byte, error) {
 	err := db.C("user").Find(bson.M{"username": r.Username, "password": r.Password}).One(&r)
 	if err != nil {
@@ -105,14 +105,14 @@ func (r User) Login() ([]byte, error) {
 	return data, err
 }
 
-//register user
+//Register user
 func (r User) Register() error {
 	r.ID = bson.NewObjectId()
 	err := db.C("user").Insert(&r)
 	return err
 }
 
-//user login control
+//CheckUser user login
 func (r User) CheckUser() bool {
 	err := db.C("user").Find(bson.M{"username": r.Username}).One(&r)
 	if err != nil {
@@ -121,7 +121,7 @@ func (r User) CheckUser() bool {
 	return false
 }
 
-// Establish a connection to database
+//Connect Establish a connection to database
 func Connect(connectionUrl string) {
 	info := &mgo.DialInfo{
 		Addrs:    []string{connectionUrl},
@@ -137,7 +137,7 @@ func Connect(connectionUrl string) {
 	db = session.DB(DB)
 }
 
-// Parse the configuration file 'config.toml', and establish a connection to DB
+//LoadConfiguration Parse the configuration file 'config.toml', and establish a connection to DB
 func LoadConfiguration() {
 	var url = os.Getenv("HOST_ENV")
 	DB = os.Getenv("DATABASE_ENV")

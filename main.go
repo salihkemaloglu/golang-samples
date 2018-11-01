@@ -14,7 +14,7 @@ import (
 	"goji.io/pat"
 )
 
-//User registration
+//UserRegister,User registration
 func UserRegister(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	var user User
@@ -38,7 +38,7 @@ func UserRegister(w http.ResponseWriter, r *http.Request) {
 	respondWithJson(w, http.StatusCreated, user)
 }
 
-//user login
+//UserLogin,user login
 func UserLogin(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	var user User
@@ -70,7 +70,7 @@ func UserLogin(w http.ResponseWriter, r *http.Request) {
 	respondWithJson(w, http.StatusOK, user)
 }
 
-// GET list of items
+//GetAll, GET list of items
 func GetAll(w http.ResponseWriter, r *http.Request) {
 	repo := Item{}
 	var e BaseRepository = repo
@@ -88,7 +88,7 @@ func GetAll(w http.ResponseWriter, r *http.Request) {
 	respondWithJson(w, http.StatusOK, item)
 }
 
-// get all user list
+//GetAllUser, get all user list
 func GetAllUser(w http.ResponseWriter, r *http.Request) {
 	repo := User{}
 	var e BaseRepository = repo
@@ -106,7 +106,7 @@ func GetAllUser(w http.ResponseWriter, r *http.Request) {
 	respondWithJson(w, http.StatusOK, user)
 }
 
-// GET a item by its ID
+//GetById, GET a item by its ID
 func GetById(w http.ResponseWriter, r *http.Request) {
 	params := pat.Param(r, "id")
 	repo := Item{ItemId: params}
@@ -124,7 +124,7 @@ func GetById(w http.ResponseWriter, r *http.Request) {
 	respondWithJson(w, http.StatusOK, repo)
 }
 
-// POST a new item
+//InsertItem, POST a new item
 func InsertItem(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	var item Item
@@ -143,7 +143,7 @@ func InsertItem(w http.ResponseWriter, r *http.Request) {
 	respondWithJson(w, http.StatusCreated, item)
 }
 
-// PUT update an existing item
+//UpdateItem, PUT update an existing item
 func UpdateItem(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	var itemGet Item
@@ -178,7 +178,7 @@ func UpdateItem(w http.ResponseWriter, r *http.Request) {
 	respondWithJson(w, http.StatusOK, map[string]string{"result": "success"})
 }
 
-// DELETE an existing item
+//DeleteItem, DELETE an existing item
 func DeleteItem(w http.ResponseWriter, r *http.Request) {
 	params := pat.Param(r, "id")
 	repo := Item{ItemId: params}

@@ -14,7 +14,7 @@ type Item struct {
 	Count       int           `bson:"count" json:"count"`
 }
 
-//db connection info struct
+//Config,db connection info struct
 type Config struct {
 	Hosts    string `json:"hosts"`
 	Database string `json:"database"`
@@ -22,7 +22,7 @@ type Config struct {
 	User     string `json:"user"`
 }
 
-//user info
+//User info
 type User struct {
 	ID       bson.ObjectId `bson:"_id" json:"id"`
 	Username *string       `bson:"username" json:"username"`
@@ -30,12 +30,12 @@ type User struct {
 	Token    string        `json:"token"`
 }
 
-//jwt token
+//JwtToken
 type JwtToken struct {
 	Token string `json:"token"`
 }
 
-//jwt exception message
+//jwt Exception message
 type Exception struct {
 	Message string `json:"message"`
 }
