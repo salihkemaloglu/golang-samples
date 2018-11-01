@@ -30,12 +30,12 @@ type User struct {
 	Token    string        `json:"token"`
 }
 
-//JwtToken
+// JwtToken struct
 type JwtToken struct {
 	Token string `json:"token"`
 }
 
-//jwt Exception message
+// Exception jwt message
 type Exception struct {
 	Message string `json:"message"`
 }

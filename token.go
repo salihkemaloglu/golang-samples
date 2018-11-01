@@ -21,8 +21,9 @@ func CreateTokenEndpoint(user User) string {
 	tokenString, err := token.SignedString([]byte("secret"))
 	if err != nil {
 		return ""
+	} else {
+		return tokenString
 	}
-	return tokenString
 }
 
 //ValidateMiddleware token validation
