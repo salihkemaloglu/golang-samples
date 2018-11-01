@@ -11,6 +11,7 @@ import (
 )
 
 var db *mgo.Database
+
 //db string
 var DB string
 
@@ -24,6 +25,8 @@ func (r Item) FindAll() ([]byte, error) {
 	data, err := json.Marshal(items)
 	return data, err
 }
+
+// Find list of users
 func (r User) FindAll() ([]byte, error) {
 	var user []User
 	err := db.C("user").Find(bson.M{}).All(&user)
@@ -43,6 +46,8 @@ func (r Item) FindById() ([]byte, error) {
 	data, err := json.Marshal(r)
 	return data, err
 }
+
+// Find a users by its id
 func (r User) FindById() ([]byte, error) {
 	err := db.C("user").FindId(bson.ObjectIdHex(*r.Password)).One(&r)
 	if err != nil {
@@ -58,6 +63,8 @@ func (r Item) Insert() error {
 	err := db.C("item").Insert(&r)
 	return err
 }
+
+// Insert a users into database
 func (r User) Insert() error {
 	r.ID = bson.NewObjectId()
 	err := db.C("user").Insert(&r)
@@ -69,6 +76,8 @@ func (r Item) Delete() error {
 	err := db.C("item").Remove(&r)
 	return err
 }
+
+// Delete an existing users
 func (r User) Delete() error {
 	err := db.C("user").Remove(&r)
 	return err
@@ -79,6 +88,8 @@ func (r Item) Update() error {
 	err := db.C("item").Update(bson.M{"_id": r.ID}, &r)
 	return err
 }
+
+// Update an existing users
 func (r User) Update() error {
 	err := db.C("user").Update(bson.M{"_id": r.ID}, &r)
 	return err
@@ -94,11 +105,14 @@ func (r User) Login() ([]byte, error) {
 	return data, err
 }
 
+//register user
 func (r User) Register() error {
 	r.ID = bson.NewObjectId()
 	err := db.C("user").Insert(&r)
 	return err
 }
+
+//user login control
 func (r User) CheckUser() bool {
 	err := db.C("user").Find(bson.M{"username": r.Username}).One(&r)
 	if err != nil {

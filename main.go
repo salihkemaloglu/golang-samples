@@ -14,6 +14,7 @@ import (
 	"goji.io/pat"
 )
 
+//User registration
 func UserRegister(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	var user User
@@ -37,6 +38,7 @@ func UserRegister(w http.ResponseWriter, r *http.Request) {
 	respondWithJson(w, http.StatusCreated, user)
 }
 
+//user login
 func UserLogin(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	var user User
@@ -85,6 +87,8 @@ func GetAll(w http.ResponseWriter, r *http.Request) {
 	}
 	respondWithJson(w, http.StatusOK, item)
 }
+
+// get all user list
 func GetAllUser(w http.ResponseWriter, r *http.Request) {
 	repo := User{}
 	var e BaseRepository = repo
