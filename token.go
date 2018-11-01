@@ -21,9 +21,8 @@ func CreateTokenEndpoint(user User) string {
 	tokenString, err := token.SignedString([]byte("secret"))
 	if err != nil {
 		return ""
-	} else {
-		return tokenString
 	}
+	return tokenString
 }
 
 //ValidateMiddleware token validation
@@ -74,7 +73,7 @@ func UserFieldValidation(user User) string {
 //ItemFildValidation item struct validaiton
 func ItemFildValidation(item Item) string {
 	if item.Name == nil {
-		return "Name fiels is missing"
+		return "Name fields is missing"
 	} else if item.Value == nil {
 		return "Value files is missing"
 	} else if strings.TrimSpace(*item.Name) == "" {
