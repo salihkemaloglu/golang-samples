@@ -11,6 +11,7 @@ import (
 )
 
 var db *mgo.Database
+//db string
 var DB string
 
 // Find list of Items
