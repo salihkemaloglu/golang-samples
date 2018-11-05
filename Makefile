@@ -13,7 +13,8 @@ help: ## This help.
 # Build the container
 build: ## Build the container
 	docker build -t $(APP_NAME) .
-
+ps:
+	docker-compose  ps
 build-nc: ## Build the container without caching
 	docker build --no-cache -t $(APP_NAME) .
 ## Run container on docker-compose environment
